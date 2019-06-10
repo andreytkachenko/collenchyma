@@ -1,6 +1,6 @@
 //! Provides a Box without any knowledge of its underlying type.
 
-use memory::*;
+use crate::memory::*;
 use std::fmt;
 use std::mem;
 use std::slice;

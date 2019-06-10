@@ -3,12 +3,12 @@ extern crate libc;
 
 #[cfg(test)]
 mod shared_memory_spec {
-    use co::prelude::*;
+    use crate::co::prelude::*;
 
     fn write_to_memory<T: Copy>(mem: &mut MemoryType, data: &[T]) {
         match mem {
             &mut MemoryType::Native(ref mut mem) => {
-                let mut mem_buffer = mem.as_mut_slice::<T>();
+                let mem_buffer = mem.as_mut_slice::<T>();
                 for (index, datum) in data.iter().enumerate() {
                     mem_buffer[index] = *datum;
                 }
@@ -126,7 +126,7 @@ mod shared_memory_spec {
     fn it_reshapes_correctly() {
         let ntv = Native::new();
         let cpu_dev = ntv.new_device(ntv.hardwares()).unwrap();
-        let mut shared_data = &mut SharedTensor::<f32>::new(&cpu_dev, &10).unwrap();
+        let shared_data = &mut SharedTensor::<f32>::new(&cpu_dev, &10).unwrap();
         assert!(shared_data.reshape(&vec![5, 2]).is_ok());
     }
 
@@ -134,7 +134,7 @@ mod shared_memory_spec {
     fn it_returns_err_for_invalid_size_reshape() {
         let ntv = Native::new();
         let cpu_dev = ntv.new_device(ntv.hardwares()).unwrap();
-        let mut shared_data = &mut SharedTensor::<f32>::new(&cpu_dev, &10).unwrap();
+        let shared_data = &mut SharedTensor::<f32>::new(&cpu_dev, &10).unwrap();
         assert!(shared_data.reshape(&vec![10, 2]).is_err());
     }
 }

@@ -2,7 +2,7 @@
 //!
 //! At Collenchyma device can be understood as a synonym to OpenCL's context.
 
-use frameworks::opencl::{API, Device, Error, Context, Queue, QueueFlags};
+use crate::frameworks::opencl::{API, Device, Error, Context, Queue, QueueFlags};
 use super::types as cl;
 use super::ffi::*;
 
@@ -12,14 +12,14 @@ impl API {
     /// OpenCL command queues are used to control memory allocation and operations
     /// for a single device.
     pub fn create_queue(context: &Context, device: &Device, queue_flags: &QueueFlags) -> Result<Queue, Error> {
-        Ok(Queue::from_c(try!(unsafe {
+        Ok(Queue::from_c(r#try!(unsafe {
             API::ffi_create_command_queue(context.id_c(), device.id_c(), queue_flags.bits())
         })))
     }
 
     /// Releases command queue from the OpenCL device.
     pub fn release_queue(queue: &mut Queue) -> Result<(), Error> {
-        Ok(try!(unsafe {API::ffi_release_command_queue(queue.id_c())}))
+        Ok(r#try!(unsafe {API::ffi_release_command_queue(queue.id_c())}))
     }
 
     unsafe fn ffi_create_command_queue(

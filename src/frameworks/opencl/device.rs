@@ -1,6 +1,6 @@
 //! Provides a Rust wrapper around OpenCL's device.
 
-use hardware::{IHardware, HardwareType};
+use crate::hardware::{IHardware, HardwareType};
 use super::api::types as cl;
 use super::api::API;
 use std::io::Cursor;

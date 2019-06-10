@@ -3,7 +3,7 @@
 //! At Collenchyma device can be understood as a synonym to OpenCL's context.
 
 use libc;
-use frameworks::opencl::{API, Error, Device};
+use crate::frameworks::opencl::{API, Error, Device};
 use super::types as cl;
 use super::ffi::*;
 
@@ -22,7 +22,7 @@ impl API {
     ) -> Result<cl::context_id, Error> {
         let device_ids: Vec<cl::device_id> = devices.iter().map(|device| device.id_c()).collect();
         Ok(
-            try!(
+            r#try!(
                 unsafe { API::ffi_create_context(properties, device_ids.len() as u32, device_ids.as_ptr(), callback, user_data) }
             )
         )

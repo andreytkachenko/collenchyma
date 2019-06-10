@@ -4,10 +4,10 @@
 //!
 //!
 
-use framework::IFramework;
-use backend::{Backend, IBackend};
-use hardware::{HardwareType, IHardware};
-use device::DeviceType;
+use crate::framework::IFramework;
+use crate::backend::{Backend, IBackend};
+use crate::hardware::{HardwareType, IHardware};
+use crate::device::DeviceType;
 use self::hardware::Hardware;
 pub use self::device::Cpu;
 pub use self::function::Function;
@@ -62,7 +62,7 @@ impl IFramework for Native {
         }
     }
 
-    fn load_hardwares() -> Result<Vec<Hardware>, ::framework::Error> {
+    fn load_hardwares() -> Result<Vec<Hardware>, crate::framework::Error> {
         let cpu = Hardware::new(1)
             .set_name(Some(String::from("Host CPU")))
             .set_hardware_type(Some(HardwareType::CPU))
@@ -79,7 +79,7 @@ impl IFramework for Native {
         &self.binary
     }
 
-    fn new_device(&self, devices: &[Hardware]) -> Result<DeviceType, ::framework::Error> {
+    fn new_device(&self, devices: &[Hardware]) -> Result<DeviceType, crate::framework::Error> {
         Ok(DeviceType::Native(Cpu::new(devices.to_vec())))
     }
 }

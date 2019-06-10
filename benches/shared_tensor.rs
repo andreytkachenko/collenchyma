@@ -6,24 +6,24 @@ extern crate collenchyma as co;
 extern crate rand;
 
 use test::Bencher;
-use co::device::{IDevice, DeviceType};
-use co::backend::{Backend, BackendConfig};
+use crate::co::device::{IDevice, DeviceType};
+use crate::co::backend::{Backend, BackendConfig};
 #[cfg(feature = "native")]
-use co::frameworks::Native;
+use crate::co::frameworks::Native;
 #[cfg(feature = "native")]
-use co::frameworks::native;
-#[cfg(feature = "opencl")]
-use co::frameworks::OpenCL;
-#[cfg(feature = "opencl")]
-use co::frameworks::opencl;
-#[cfg(feature = "cuda")]
-use co::frameworks::Cuda;
-#[cfg(feature = "cuda")]
-use co::frameworks::cuda;
-use co::framework::IFramework;
-use co::tensor::SharedTensor;
 
-use rand::{thread_rng, Rng};
+#[cfg(feature = "opencl")]
+use crate::co::frameworks::OpenCL;
+#[cfg(feature = "opencl")]
+use crate::co::frameworks::opencl;
+#[cfg(feature = "cuda")]
+use crate::co::frameworks::Cuda;
+#[cfg(feature = "cuda")]
+
+use crate::co::framework::IFramework;
+use crate::co::tensor::SharedTensor;
+
+
 
 #[cfg(feature = "native")]
 fn native_backend() -> Backend<Native> {

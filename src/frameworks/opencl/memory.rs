@@ -2,7 +2,7 @@
 use super::api::types as cl;
 use super::api::{API, Error};
 use super::Context;
-use memory::*;
+use crate::memory::*;
 
 use std::{ptr, fmt};
 

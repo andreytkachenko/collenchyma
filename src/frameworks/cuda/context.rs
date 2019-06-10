@@ -1,13 +1,13 @@
 //! Provides a Rust wrapper around Cuda's context.
 
-use device::{IDevice, DeviceType, IDeviceSyncOut};
-use device::Error as DeviceError;
+use crate::device::{IDevice, DeviceType, IDeviceSyncOut};
+use crate::device::Error as DeviceError;
 use super::api::DriverFFI;
 use super::{Driver, DriverError, Device};
 use super::memory::*;
 #[cfg(feature = "native")]
-use frameworks::native::flatbox::FlatBox;
-use memory::MemoryType;
+use crate::frameworks::native::flatbox::FlatBox;
+use crate::memory::MemoryType;
 use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 
@@ -33,7 +33,7 @@ impl Context {
     pub fn new(devices: Device) -> Result<Context, DriverError> {
         Ok(
             Context::from_c(
-                try!(Driver::create_context(devices.clone())),
+                r#try!(Driver::create_context(devices.clone())),
                 vec!(devices.clone())
             )
         )
@@ -67,7 +67,7 @@ impl Context {
 impl IDeviceSyncOut<FlatBox> for Context {
     type M = Memory;
     fn sync_out(&self, source_data: &Memory, dest_data: &mut FlatBox) -> Result<(), DeviceError> {
-        Ok(try!(Driver::mem_cpy_d_to_h(source_data, dest_data)))
+        Ok(r#try!(Driver::mem_cpy_d_to_h(source_data, dest_data)))
     }
 }
 
@@ -84,7 +84,7 @@ impl IDevice for Context {
     }
 
     fn alloc_memory(&self, size: DriverFFI::size_t) -> Result<Memory, DeviceError> {
-        Ok(try!(Driver::mem_alloc(size)))
+        Ok(r#try!(Driver::mem_alloc(size)))
     }
 
     fn sync_in(&self, source: &DeviceType, source_data: &MemoryType, dest_data: &mut Memory) -> Result<(), DeviceError> {
@@ -92,7 +92,7 @@ impl IDevice for Context {
             #[cfg(feature = "native")]
             &DeviceType::Native(_) => {
                 match source_data.as_native() {
-                    Some(h_mem) => Ok(try!(Driver::mem_cpy_h_to_d(h_mem, dest_data))),
+                    Some(h_mem) => Ok(r#try!(Driver::mem_cpy_h_to_d(h_mem, dest_data))),
                     None => unimplemented!()
                 }
             },

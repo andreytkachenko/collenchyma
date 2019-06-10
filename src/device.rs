@@ -6,20 +6,20 @@
 //!
 //! [backend]: ../backend/index.html
 
-use hardware::IHardware;
-use memory::{IMemory, MemoryType};
+use crate::hardware::IHardware;
+use crate::memory::{IMemory, MemoryType};
 #[cfg(feature = "native")]
-use frameworks::native::device::Cpu;
+use crate::frameworks::native::device::Cpu;
 #[cfg(feature = "native")]
-use frameworks::native::Error as NativeError;
+use crate::frameworks::native::Error as NativeError;
 #[cfg(feature = "opencl")]
-use frameworks::opencl::Context as OpenCLContext;
+use crate::frameworks::opencl::Context as OpenCLContext;
 #[cfg(feature = "opencl")]
-use frameworks::opencl::Error as OpenCLError;
+use crate::frameworks::opencl::Error as OpenCLError;
 #[cfg(feature = "cuda")]
-use frameworks::cuda::Context as CudaContext;
+use crate::frameworks::cuda::Context as CudaContext;
 #[cfg(feature = "cuda")]
-use frameworks::cuda::DriverError as CudaError;
+use crate::frameworks::cuda::DriverError as CudaError;
 use std::{fmt, error};
 
 /// Specifies Hardware behavior across frameworks.
@@ -103,7 +103,7 @@ impl error::Error for Error {
         }
     }
 
-    fn cause(&self) -> Option<&error::Error> {
+    fn cause(&self) -> Option<&dyn error::Error> {
         match *self {
             #[cfg(feature = "native")]
             Error::Native(ref err) => Some(err),
@@ -136,8 +136,8 @@ impl From<CudaError> for Error {
     }
 }
 
-impl From<Error> for ::tensor::Error {
-    fn from(err: Error) -> ::tensor::Error {
-        ::tensor::Error::MemoryAllocationError(err)
+impl From<Error> for crate::tensor::Error {
+    fn from(err: Error) -> crate::tensor::Error {
+        crate::tensor::Error::MemoryAllocationError(err)
     }
 }

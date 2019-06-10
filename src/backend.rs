@@ -40,9 +40,9 @@
 //! }
 //! ```
 
-use error::Error;
-use framework::IFramework;
-use device::{IDevice, DeviceType};
+use crate::error::Error;
+use crate::framework::IFramework;
+use crate::device::{IDevice, DeviceType};
 
 #[derive(Debug, Clone)]
 /// Defines the main and highest struct of Collenchyma.
@@ -66,7 +66,7 @@ pub struct Backend<F: IFramework> {
 impl<F: IFramework + Clone> Backend<F> {
     /// Initialize a new native Backend from a BackendConfig.
     pub fn new(config: BackendConfig<F>) -> Result<Backend<F>, Error> {
-        let device = try!(config.framework.new_device(config.hardwares));
+        let device = r#try!(config.framework.new_device(config.hardwares));
         Ok(
             Backend {
                 framework: Box::new(config.framework),
@@ -111,7 +111,7 @@ pub trait IBackend {
     }
 
     /// Synchronize backend.
-    fn synchronize(&self) -> Result<(), ::framework::Error> { Ok(()) }
+    fn synchronize(&self) -> Result<(), crate::framework::Error> { Ok(()) }
 }
 
 #[derive(Debug, Clone)]

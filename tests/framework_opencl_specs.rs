@@ -4,9 +4,9 @@ extern crate libc;
 #[cfg(test)]
 #[cfg(feature = "opencl")]
 mod framework_opencl_spec {
-    use co::prelude::*;
-    use co::frameworks::opencl::memory::*;
-    use co::frameworks::opencl::queue::*;
+    use crate::co::prelude::*;
+    use crate::co::frameworks::opencl::memory::*;
+    use crate::co::frameworks::opencl::queue::*;
 
     #[test]
     fn it_works() {

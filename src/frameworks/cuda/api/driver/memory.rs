@@ -2,8 +2,8 @@
 
 use super::{API, Error};
 #[cfg(feature = "native")]
-use frameworks::native::flatbox::FlatBox;
-use frameworks::cuda::Memory;
+use crate::frameworks::native::flatbox::FlatBox;
+use crate::frameworks::cuda::Memory;
 use super::ffi::*;
 
 impl API {
@@ -13,7 +13,7 @@ impl API {
     /// aligned for any kind of variable. The memory is not cleared.
     /// Returns a memory id for the created buffer, which can now be writen to.
     pub fn mem_alloc(bytesize: size_t) -> Result<Memory, Error> {
-        Ok(Memory::from_c(try!(unsafe {API::ffi_mem_alloc(bytesize)})))
+        Ok(Memory::from_c(r#try!(unsafe {API::ffi_mem_alloc(bytesize)})))
     }
 
     /// Releases allocated memory from the Cuda device.

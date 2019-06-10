@@ -9,9 +9,10 @@
 
 extern { }
 
-use backend::{Backend, IBackend};
-use framework::IFramework;
-use device::DeviceType;
+use crate::backend::{Backend, IBackend};
+use crate::framework::IFramework;
+use crate::device::DeviceType;
+
 pub use self::memory::Memory;
 pub use self::context::Context;
 pub use self::function::Function;
@@ -57,8 +58,8 @@ impl IFramework for Cuda {
         }
     }
 
-    fn load_hardwares() -> Result<Vec<Device>, ::framework::Error> {
-        Ok(try!(Driver::load_devices()))
+    fn load_hardwares() -> Result<Vec<Device>, crate::framework::Error> {
+        Ok(Driver::load_devices()?)
     }
 
     fn hardwares(&self) -> &[Device] {
@@ -73,12 +74,12 @@ impl IFramework for Cuda {
     ///
     /// Cuda's context differs from OpenCL's context. Multi device support works different in Cuda.
     /// This function currently suppports only one device, but should be a wrapper for multi device support.
-    fn new_device(&self, hardwares: &[Device]) -> Result<DeviceType, ::framework::Error> {
+    fn new_device(&self, hardwares: &[Device]) -> Result<DeviceType, crate::framework::Error> {
         let length = hardwares.len();
         match length {
-            0 => Err(::framework::Error::Implementation(format!("No device for context specified."))),
-            1 => Ok(DeviceType::Cuda(try!(Context::new(hardwares[0].clone())))),
-            _ => Err(::framework::Error::Implementation(format!("Cuda's `new_device` method currently supports only one Harware for Device creation.")))
+            0 => Err(crate::framework::Error::Implementation(format!("No device for context specified."))),
+            1 => Ok(DeviceType::Cuda(Context::new(hardwares[0].clone())?)),
+            _ => Err(crate::framework::Error::Implementation(format!("Cuda's `new_device` method currently supports only one Harware for Device creation.")))
         }
     }
 }
@@ -90,11 +91,11 @@ impl IBackend for Backend<Cuda> {
         &self.device()
     }
 
-    fn synchronize(&self) -> Result<(), ::framework::Error> {
+    fn synchronize(&self) -> Result<(), crate::framework::Error> {
         if let &DeviceType::Cuda(ref ctx) = self.device() {
-            Ok(try!(ctx.synchronize()))
+            Ok(ctx.synchronize()?)
         } else {
-            Err(::framework::Error::Implementation(format!("CUDA backend does not have a CUDA context.")))
+            Err(crate::framework::Error::Implementation(format!("CUDA backend does not have a CUDA context.")))
         }
     }
 }

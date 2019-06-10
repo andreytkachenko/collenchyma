@@ -66,7 +66,7 @@ impl ::std::error::Error for Error {
         }
     }
 
-    fn cause(&self) -> Option<&::std::error::Error> {
+    fn cause(&self) -> Option<&dyn (::std::error::Error)> {
         match *self {
             Error::MissingMemoryForDevice(_) => None,
             Error::Operation(_) => None,
@@ -75,8 +75,8 @@ impl ::std::error::Error for Error {
     }
 }
 
-impl From<Error> for ::error::Error {
-    fn from(err: Error) -> ::error::Error {
-        ::error::Error::Plugin(err)
+impl From<Error> for crate::error::Error {
+    fn from(err: Error) -> crate::error::Error {
+        crate::error::Error::Plugin(err)
     }
 }

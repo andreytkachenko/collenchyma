@@ -1,7 +1,7 @@
 //! Provides the OpenCL API with its platform functionality.
 
-use frameworks::opencl::{API, Error};
-use frameworks::opencl::Platform;
+use crate::frameworks::opencl::{API, Error};
+use crate::frameworks::opencl::Platform;
 use super::types as cl;
 use super::ffi::*;
 use std::ptr;
@@ -27,11 +27,11 @@ impl API {
         }
 
         let guard = PLATFORM_MUTEX.lock();
-        try!(unsafe {API::ffi_get_platform_ids(0, ptr::null_mut(), (&mut num_platforms))});
+        r#try!(unsafe {API::ffi_get_platform_ids(0, ptr::null_mut(), &mut num_platforms)});
 
         let mut ids: Vec<cl::device_id> = repeat(0 as cl::device_id).take(num_platforms as usize).collect();
 
-        try!(unsafe {API::ffi_get_platform_ids(num_platforms, ids.as_mut_ptr(), (&mut num_platforms))});
+        r#try!(unsafe {API::ffi_get_platform_ids(num_platforms, ids.as_mut_ptr(), &mut num_platforms)});
 
         let _ = guard;
 

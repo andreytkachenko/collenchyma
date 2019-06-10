@@ -1,8 +1,8 @@
 //! Provides a hardware aka. the host CPU.
 
-use device::{IDevice, DeviceType, IDeviceSyncOut};
-use device::Error as DeviceError;
-use memory::MemoryType;
+use crate::device::{IDevice, DeviceType, IDeviceSyncOut};
+use crate::device::Error as DeviceError;
+use crate::memory::MemoryType;
 use super::hardware::Hardware;
 use super::Error;
 use super::flatbox::FlatBox;
@@ -49,14 +49,14 @@ impl IDevice for Cpu {
             #[cfg(feature = "cuda")]
             &DeviceType::Cuda(ref context) => {
                 match source_data.as_cuda() {
-                    Some(h_mem) => Ok(try!(context.sync_out(&h_mem, dest_data))),
+                    Some(h_mem) => Ok(r#try!(context.sync_out(&h_mem, dest_data))),
                     None => Err(DeviceError::Native(Error::Memory("Expected CUDA Memory")))
                 }
             },
             #[cfg(feature = "opencl")]
             &DeviceType::OpenCL(ref context) => {
                 match source_data.as_opencl() {
-                    Some(h_mem) => Ok(try!(context.sync_out(&h_mem, dest_data))),
+                    Some(h_mem) => Ok(r#try!(context.sync_out(&h_mem, dest_data))),
                     None => Err(DeviceError::Native(Error::Memory("Expected OpenCL Memory")))
                 }
             },

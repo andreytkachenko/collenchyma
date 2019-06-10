@@ -48,8 +48,8 @@
 //! ```
 
 use linear_map::LinearMap;
-use device::{IDevice, DeviceType};
-use memory::MemoryType;
+use crate::device::{IDevice, DeviceType};
+use crate::memory::MemoryType;
 use std::marker::PhantomData;
 use std::{fmt, mem, error};
 
@@ -241,7 +241,7 @@ impl<T> SharedTensor<T> {
     /// [1]: ../memory/index.html
     pub fn new<D: IntoTensorDesc>(dev: &DeviceType, desc: &D) -> Result<SharedTensor<T>, Error> {
         let copies = LinearMap::<DeviceType, MemoryType>::new();
-        let copy = try!(Self::alloc_on_device(dev, desc));
+        let copy = Self::alloc_on_device(dev, desc)?;
         let tensor_desc: TensorDesc = desc.into();
         Ok(SharedTensor {
             desc: tensor_desc,
@@ -274,7 +274,7 @@ impl<T> SharedTensor<T> {
     /// are identical because it will not reallocate memory.
     pub fn resize<D: IntoTensorDesc>(&mut self, desc: &D) -> Result<(), Error> {
         self.copies.clear();
-        self.latest_copy = try!(Self::alloc_on_device(self.latest_device(), desc));
+        self.latest_copy = Self::alloc_on_device(self.latest_device(), desc)?;
         let new_desc: TensorDesc = desc.into();
         self.desc = new_desc;
         Ok(())
@@ -286,11 +286,11 @@ impl<T> SharedTensor<T> {
         let alloc_size = Self::mem_size(tensor_desc.size());
         let copy = match *dev {
             #[cfg(feature = "native")]
-            DeviceType::Native(ref cpu) => MemoryType::Native(try!(cpu.alloc_memory(alloc_size))),
+            DeviceType::Native(ref cpu) => MemoryType::Native(cpu.alloc_memory(alloc_size)?),
             #[cfg(feature = "opencl")]
-            DeviceType::OpenCL(ref context) => MemoryType::OpenCL(try!(context.alloc_memory(alloc_size))),
+            DeviceType::OpenCL(ref context) => MemoryType::OpenCL(context.alloc_memory(alloc_size)?),
             #[cfg(feature = "cuda")]
-            DeviceType::Cuda(ref context) => MemoryType::Cuda(try!(context.alloc_memory(alloc_size))),
+            DeviceType::Cuda(ref context) => MemoryType::Cuda(context.alloc_memory(alloc_size)?),
         };
         Ok(copy)
     }
@@ -299,10 +299,12 @@ impl<T> SharedTensor<T> {
     pub fn sync(&mut self, destination: &DeviceType) -> Result<(), Error> {
         if &self.latest_location != destination {
             let latest = self.latest_location.clone();
-            try!(self.sync_from_to(&latest, &destination));
+            self.sync_from_to(&latest, &destination)?;
 
             let mut swap_location = destination.clone();
-            let mut swap_copy = try!(self.copies.remove(destination).ok_or(Error::MissingDestination("Tensor does not hold a copy on destination device.")));
+            let mut swap_copy = self.copies.remove(destination)
+                .ok_or(Error::MissingDestination("Tensor does not hold a copy on destination device."))?;
+            
             mem::swap(&mut self.latest_location, &mut swap_location);
             mem::swap(&mut self.latest_copy, &mut swap_copy);
             self.copies.insert(swap_location, swap_copy);
@@ -336,26 +338,26 @@ impl<T> SharedTensor<T> {
     fn sync_from_to(&mut self, source: &DeviceType, destination: &DeviceType) -> Result<(), Error> {
         if source != destination {
             match self.copies.get_mut(destination) {
-                Some(mut destination_copy) => {
+                Some(destination_copy) => {
                     match destination {
                         #[cfg(feature = "native")]
                         &DeviceType::Native(ref cpu) => {
                             match destination_copy.as_mut_native() {
-                                Some(ref mut mem) => try!(cpu.sync_in(&self.latest_location, &self.latest_copy, mem)),
+                                Some(ref mut mem) => cpu.sync_in(&self.latest_location, &self.latest_copy, mem)?,
                                 None => return Err(Error::InvalidMemory("Expected Native Memory (FlatBox)"))
                             }
                         },
                         #[cfg(feature = "cuda")]
                         &DeviceType::Cuda(ref context) => {
                             match destination_copy.as_mut_cuda() {
-                                Some(ref mut mem) => try!(context.sync_in(&self.latest_location, &self.latest_copy, mem)),
+                                Some(ref mut mem) => context.sync_in(&self.latest_location, &self.latest_copy, mem)?,
                                 None => return Err(Error::InvalidMemory("Expected CUDA Memory."))
                             }
                         },
                         #[cfg(feature = "opencl")]
                         &DeviceType::OpenCL(ref context) => {
                             match destination_copy.as_mut_opencl() {
-                                Some(ref mut mem) => try!(context.sync_in(&self.latest_location, &self.latest_copy, mem)),
+                                Some(ref mut mem) => context.sync_in(&self.latest_location, &self.latest_copy, mem)?,
                                 None => return Err(Error::InvalidMemory("Expected OpenCL Memory."))
                             }
                         }
@@ -374,7 +376,7 @@ impl<T> SharedTensor<T> {
         // If `destination` holds the latest data, sync to another memory first, before removing it.
         if &self.latest_location == destination {
             let first = self.copies.keys().nth(0).unwrap().clone();
-            try!(self.sync(&first));
+            self.sync(&first)?;
         }
         match self.copies.remove(destination) {
             Some(destination_cpy) => Ok(destination_cpy),
@@ -401,11 +403,11 @@ impl<T> SharedTensor<T> {
                 let copy: MemoryType;
                 match *device {
                     #[cfg(feature = "native")]
-                    DeviceType::Native(ref cpu) => copy = MemoryType::Native(try!(cpu.alloc_memory(Self::mem_size(self.capacity())))),
+                    DeviceType::Native(ref cpu) => copy = MemoryType::Native(cpu.alloc_memory(Self::mem_size(self.capacity()))?),
                     #[cfg(feature = "opencl")]
-                    DeviceType::OpenCL(ref context) => copy = MemoryType::OpenCL(try!(context.alloc_memory(Self::mem_size(self.capacity())))),
+                    DeviceType::OpenCL(ref context) => copy = MemoryType::OpenCL(context.alloc_memory(Self::mem_size(self.capacity()))?),
                     #[cfg(feature = "cuda")]
-                    DeviceType::Cuda(ref context) => copy = MemoryType::Cuda(try!(context.alloc_memory(Self::mem_size(self.capacity())))),
+                    DeviceType::Cuda(ref context) => copy = MemoryType::Cuda(context.alloc_memory(Self::mem_size(self.capacity()))?),
                 };
                 self.copies.insert(device.clone(), copy);
                 Ok(self)
@@ -448,9 +450,9 @@ pub enum Error {
     /// Unable to remove Memory copy from SharedTensor.
     InvalidRemove(&'static str),
     /// Framework error at memory allocation.
-    MemoryAllocationError(::device::Error),
+    MemoryAllocationError(crate::device::Error),
     /// Framework error at memory synchronization.
-    MemorySynchronizationError(::device::Error),
+    MemorySynchronizationError(crate::device::Error),
     /// Shape provided for reshaping is not compatible with old shape.
     InvalidShape(&'static str)
 }
@@ -484,7 +486,7 @@ impl error::Error for Error {
         }
     }
 
-    fn cause(&self) -> Option<&error::Error> {
+    fn cause(&self) -> Option<&dyn error::Error> {
         match *self {
             Error::MissingSource(_) => None,
             Error::MissingDestination(_) => None,
@@ -498,8 +500,8 @@ impl error::Error for Error {
     }
 }
 
-impl From<Error> for ::error::Error {
-    fn from(err: Error) -> ::error::Error {
-        ::error::Error::Tensor(err)
+impl From<Error> for crate::error::Error {
+    fn from(err: Error) -> crate::error::Error {
+        crate::error::Error::Tensor(err)
     }
 }

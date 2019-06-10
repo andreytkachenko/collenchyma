@@ -1,7 +1,7 @@
 //! Provides a Rust wrapper around Cuda's memory.
 
 use super::api::{Driver, DriverFFI, DriverError};
-use memory::*;
+use crate::memory::*;
 
 use std::{ptr, fmt};
 

@@ -8,11 +8,11 @@
 //! [tensor]: ../tensor/index.html
 
 #[cfg(feature = "native")]
-use frameworks::native::flatbox::FlatBox;
+use crate::frameworks::native::flatbox::FlatBox;
 #[cfg(feature = "opencl")]
-use frameworks::opencl::memory::Memory as OpenCLMemory;
+use crate::frameworks::opencl::memory::Memory as OpenCLMemory;
 #[cfg(feature = "cuda")]
-use frameworks::cuda::memory::Memory as CudaMemory;
+use crate::frameworks::cuda::memory::Memory as CudaMemory;
 
 /// Specifies Memory behavior accross frameworks.
 pub trait IMemory { }
