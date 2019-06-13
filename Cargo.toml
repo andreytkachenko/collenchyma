@@ -32,7 +32,7 @@ collenchyma-nn = {path = "../collenchyma-nn", features=["cuda", "native"]}
 
 
 [features]
-default = ["native", "cuda", "opencl"]
+default = ["native", "cuda"]
 native = []
 cuda = []
 opencl = []
